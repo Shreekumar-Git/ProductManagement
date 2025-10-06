@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product Catalog</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+        #productForm, #productTable {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        const BASE_URL = "http://localhost:8080/products";
+
+        async function loadProducts() {
+            const response = await fetch(BASE_URL);
+            const products = await response.json();
+
+            const tableBody = document.getElementById('productTableBody');
+            tableBody.innerHTML = '';
+
+            products.forEach(p => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${p.productID}</td>
+                    <td>${p.productName}</td>
+                    <td>${p.productPrice}</td>
+                    <td>${p.productCategory}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById('productTable').style.display = 'block';
+            document.getElementById('productForm').style.display = 'none';
+        }
+
+        function showAddProductForm() {
+            document.getElementById('productForm').style.display = 'block';
+            document.getElementById('productTable').style.display = 'none';
+        }
+
+        async function addProduct(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('productName').value;
+            const price = parseInt(document.getElementById('productPrice').value);
+            const category = document.getElementById('productCategory').value;
+
+            await fetch(BASE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productName: name,
+                    productPrice: price,
+                    productCategory: category
+                })
+            });
+
+            alert("Product added successfully!");
+            document.getElementById('productName').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productCategory').value = '';
+            loadProducts();
+        }
+    </script>
+</head>
+<body>
+    <h1>Product Catalog</h1>
+
+    <button onclick="loadProducts()">View Products</button>
+    <button onclick="showAddProductForm()">Add Product</button>
+
+    <!-- Add Product Form -->
+    <div id="productForm">
+        <h2>Add New Product</h2>
+        <form onsubmit="addProduct(event)">
+            <input type="text" id="productName" placeholder="Product Name" required>
+            <input type="number" id="productPrice" placeholder="Product Price" required>
+            <input type="text" id="productCategory" placeholder="Product Category" required>
+            <button type="submit">Add Product</button>
+        </form>
+    </div>
+
+    <!-- Product Table -->
+    <div id="productTable">
+        <h2>Product List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody id="productTableBody"></tbody>
+        </table>
+    </div>
+</body>
+</html>
